@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Automation or agent? — a 5-question diagnostic by Ali Lari</title>
+<meta name="description" content="Most teams reach for an AI agent when a boring automation would do the job better. Five questions to tell which one your task actually needs." />
+<style>
+  :root{
+    --navy:#0E1B33; --navy2:#0A1428; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .aoa{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .wrap{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold); }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px; }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance; }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch; }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px; }
+  .byline b{ color:var(--cream); font-weight:600; }
+  .progress{ height:4px; background:var(--line); margin:30px 0 24px; overflow:hidden; }
+  .progress>span{ display:block; height:100%; background:var(--gold); transition:width .35s ease; }
+  .q{ font-size:23px; font-weight:700; line-height:1.3; margin:0 0 20px; text-wrap:balance; }
+  .opts{ display:flex; flex-direction:column; gap:12px; }
+  .opt{ text-align:left; background:var(--card); color:var(--cream); border:1px solid var(--line); border-radius:12px; padding:16px 18px; font-size:16px; line-height:1.4; cursor:pointer; transition:border-color .15s, transform .05s; font-family:inherit; }
+  .opt:hover{ border-color:var(--gold) }
+  .opt:active{ transform:scale(.99) }
+  :focus-visible{ outline:2px solid var(--gold-soft); outline-offset:2px }
+  .meta{ display:flex; justify-content:space-between; align-items:center; color:var(--dim); font-size:13px; margin-top:18px; }
+  .back{ background:none; border:none; color:var(--dim); cursor:pointer; font-size:13px; font-family:inherit; padding:0 }
+  .back:hover{ color:var(--cream) }
+  .chip{ display:inline-flex; align-items:center; font-size:12px; letter-spacing:.1em; text-transform:uppercase; padding:6px 13px; border-radius:999px; font-weight:700; color:var(--navy) }
+  .r-title{ font-size:clamp(26px,5vw,38px); font-weight:800; letter-spacing:-.02em; line-height:1.12; margin:16px 0 14px; text-wrap:balance }
+  .r-body p{ color:var(--cream); font-size:17px; line-height:1.6; margin:0 0 14px }
+  .next{ background:var(--card); border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:0 12px 12px 0; padding:16px 18px; margin-top:4px }
+  .next .lab{ color:var(--gold); font-size:12px; letter-spacing:.12em; text-transform:uppercase }
+  .next p{ margin:7px 0 0; font-size:16px; line-height:1.5 }
+  .actions{ display:flex; gap:12px; margin-top:26px; flex-wrap:wrap }
+  .btn{ font-family:inherit; font-size:15px; font-weight:600; border-radius:10px; padding:12px 18px; cursor:pointer; border:1px solid var(--line); background:transparent; color:var(--cream) }
+  .btn.primary{ background:var(--gold); color:var(--navy); border-color:var(--gold) }
+  .foot{ color:var(--dim); font-size:13px; margin-top:32px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="aoa"><div class="wrap" id="root"></div></div>
+<script>
+(function(){
+  var root=document.getElementById('root');
+  var Q=[
+    {q:"How often does this task happen?",opts:[
+      {t:"Many times a day or week",s:{}},
+      {t:"A few times a month",s:{}},
+      {t:"Rarely, or it is a one-off",s:{n:2}}]},
+    {q:"Are the steps the same every time, or do they change with the situation?",opts:[
+      {t:"The same steps every time",s:{a:2}},
+      {t:"Mostly the same, with a few exceptions",s:{a:1}},
+      {t:"They change a lot",s:{g:2}}]},
+    {q:"Does it need a judgment call, or just moving and formatting information?",opts:[
+      {t:"Just moving or formatting data",s:{a:2}},
+      {t:"Some judgment, but the rules are clear",s:{a:1}},
+      {t:"Real judgment on messy input",s:{g:2}}]},
+    {q:"What do the inputs look like?",opts:[
+      {t:"Structured: a form, a sheet, an API",s:{a:2}},
+      {t:"A mix of structured and messy",s:{a:1,g:1}},
+      {t:"Messy: emails, chats, documents, images",s:{g:2}}]},
+    {q:"Could you write the exact rules on one page?",opts:[
+      {t:"Yes, easily",s:{a:2}},
+      {t:"Sort of, with some gaps",s:{a:1}},
+      {t:"No, there are too many judgment calls",s:{g:2}}]}
+  ];
+  var step=0, ans=[];
+  // COMPUTE-START automation-or-agent (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var ans=v.answers||[];
+    var t={a:0,g:0,n:0};
+    ans.forEach(function(s){for(var k in s)t[k]+=(s[k]||0);});
+    var verdict;
+    if(t.n>=2 && t.a<3 && t.g<3) verdict='notyet';
+    else if(t.a>=t.g+2) verdict='automation';
+    else if(t.g>=t.a+2) verdict='agent';
+    else if(t.a>t.g) verdict='automation';
+    else if(t.g>t.a) verdict='agent';
+    else verdict='hybrid';
+    return {verdict:verdict, tally:t};
+  }
+  // COMPUTE-END
+  function esc(x){return x;}
+  function header(){
+    return '<div class="rule"></div><div class="eyebrow">Decide before you build</div>'+
+      '<h1>Automation or agent?</h1>'+
+      '<p class="sub">Most teams reach for an AI agent when a boring automation would do the job better and cheaper. Five questions to tell which one your task actually needs.</p>'+
+      '<p class="byline">Built by <b>Ali Lari</b></p>';
+  }
+  function renderQ(){
+    var item=Q[step], pct=Math.round(step/Q.length*100);
+    root.innerHTML=header()+
+      '<div class="progress"><span style="width:'+pct+'%"></span></div>'+
+      '<p class="q">'+item.q+'</p>'+
+      '<div class="opts">'+item.opts.map(function(o,i){return '<button class="opt" data-i="'+i+'">'+o.t+'</button>';}).join('')+'</div>'+
+      '<div class="meta"><span>Question '+(step+1)+' of '+Q.length+'</span>'+(step>0?'<button class="back" id="back">Back</button>':'<span></span>')+'</div>';
+    Array.prototype.forEach.call(root.querySelectorAll('.opt'),function(b){b.addEventListener('click',function(){ans[step]=item.opts[+b.dataset.i].s;step++;render();});});
+    var back=document.getElementById('back');
+    if(back)back.addEventListener('click',function(){step--;ans.pop();render();});
+  }
+  function verdict(){ return compute({answers:ans}).verdict; }
+  var R={
+    automation:{chip:"Automation",color:"var(--teal)",title:"You need an automation, not an agent.",
+      body:["Your task is predictable and rule-based, and the inputs are tidy. That is the sweet spot for a plain automation, and it will beat an AI agent on cost, speed, and reliability every time.","An agent here is overkill. It adds cost, latency, and a fresh way to be wrong, to solve a problem a short script already handles."],
+      next:"Write the exact steps on one page, then wire them together with a scheduler and the two or three apps involved. No model needed for the core. Add AI only if one step genuinely has to read messy text."},
+    agent:{chip:"Agent",color:"var(--gold)",title:"This one is a real job for an agent.",
+      body:["Your inputs are messy and the task needs judgment that shifts case by case. That is exactly where a language model earns its place: reading unstructured input, applying your rules, and deciding what to do.","Keep it on rails. Give it your written rules, a narrow job, and a human check on anything high-stakes until you trust it."],
+      next:"Write your decision rules in plain English first. Feed the messy input plus those rules to a model, have it draft the action, and approve the first few dozen yourself before letting it run on its own."},
+    hybrid:{chip:"Both",color:"var(--gold-soft)",title:"Split it: automate the predictable part, agent the messy part.",
+      body:["Your task is part clockwork, part judgment. The mistake is building one clever agent for the whole thing. Automate the predictable eighty percent, and hand only the messy exceptions to a model.","You get the reliability of a script where the work is routine, and judgment only where it is actually needed."],
+      next:"Draw the task as steps and mark each one predictable or messy. Automate the predictable steps directly. Route only the messy steps to a model, with your rules attached."},
+    notyet:{chip:"Not yet",color:"var(--grey)",title:"Do not build anything yet.",
+      body:["This task does not happen often enough to earn an automation or an agent. The time you would spend building it is more than the time it costs you by hand.","Come back when it turns into a daily or weekly pain. Building tools for rare tasks is how weekends vanish with nothing to show."],
+      next:"Keep doing it by hand for now, and note how often it actually comes up. If it becomes a regular annoyance, run this again."}
+  };
+  function renderResult(){
+    var r=R[verdict()];
+    root.innerHTML=header()+
+      '<div class="progress"><span style="width:100%"></span></div>'+
+      '<span class="chip" style="background:'+r.color+'">'+r.chip+'</span>'+
+      '<h2 class="r-title">'+r.title+'</h2>'+
+      '<div class="r-body">'+r.body.map(function(p){return '<p>'+p+'</p>';}).join('')+'</div>'+
+      '<div class="next"><div class="lab">What to build first</div><p>'+r.next+'</p></div>'+
+      '<div class="actions"><button class="btn primary" id="again">Start over</button></div>'+
+      '<p class="foot">Built by Ali Lari. If this settled a debate on your team, send it to whoever keeps buying tools.</p>';
+    document.getElementById('again').addEventListener('click',function(){step=0;ans=[];render();});
+  }
+  function render(){ if(step<Q.length) renderQ(); else renderResult(); window.scrollTo(0,0); }
+  render();
+})();
+</script>
+</body>
+</html>

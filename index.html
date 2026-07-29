@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Free decision tools for founders and operators — Ali Lari</title>
+<meta name="description" content="Thirteen free tools that settle a business decision in about a minute. No login, no email, nothing to install. Built by Ali Lari." />
+<meta property="og:title" content="Free decision tools for founders and operators" />
+<meta property="og:description" content="Thirteen free tools that settle a business decision in about a minute. No login, no email, nothing to install." />
+<meta property="og:type" content="website" />
+<style>
+  :root{
+    --navy:#0E1B33; --navy2:#0A1428; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{
+    color:var(--cream);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{ min-height:100vh; padding:clamp(32px,6vw,88px) 20px clamp(48px,6vw,80px); display:flex; justify-content:center; }
+  .wrap{ width:100%; max-width:860px; }
+
+  /* hero */
+  .rule{ width:56px; height:5px; background:var(--gold); }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px; }
+  h1{
+    font-size:clamp(32px,6.4vw,58px); line-height:1.03; font-weight:800;
+    letter-spacing:-.025em; margin:12px 0 0; text-wrap:balance; max-width:24ch;
+  }
+  .lede{ color:var(--dim); font-size:clamp(16px,2.1vw,19px); line-height:1.55; margin:18px 0 0; max-width:54ch; }
+  .lede b{ color:var(--cream); font-weight:600; }
+
+  /* the promise strip: three facts, not decoration */
+  .facts{ display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+  .fact{
+    font-size:13px; color:var(--cream); background:var(--card);
+    border:1px solid var(--line); border-radius:999px; padding:7px 14px;
+  }
+  .fact b{ color:var(--gold); font-weight:700; }
+
+  /* groups */
+  .group{ margin-top:clamp(40px,5vw,64px); }
+  .group-head{ display:flex; align-items:baseline; gap:14px; border-bottom:1px solid var(--line); padding-bottom:12px; }
+  .group-head h2{ font-size:15px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin:0; font-weight:700; }
+  .group-head span{ color:var(--dim); font-size:13px; }
+
+  .grid{ display:grid; gap:14px; margin-top:18px; grid-template-columns:1fr; }
+  @media (min-width:640px){ .grid{ grid-template-columns:1fr 1fr; } }
+
+  /* card: the question leads, the tool name is secondary */
+  a.tool{
+    display:block; text-decoration:none; color:inherit;
+    background:var(--card); border:1px solid var(--line);
+    border-left:3px solid var(--line);
+    border-radius:0 12px 12px 0; padding:18px 20px;
+    transition:border-color .15s ease, transform .06s ease;
+  }
+  a.tool:hover{ border-color:var(--gold); border-left-color:var(--gold); }
+  a.tool:active{ transform:scale(.995); }
+  a.tool .q{ font-size:18px; font-weight:700; line-height:1.3; letter-spacing:-.01em; margin:0; text-wrap:balance; }
+  a.tool .name{ color:var(--gold); font-size:12px; letter-spacing:.1em; text-transform:uppercase; margin:10px 0 0; font-weight:700; }
+  a.tool .desc{ color:var(--dim); font-size:14.5px; line-height:1.5; margin:8px 0 0; }
+
+  :focus-visible{ outline:2px solid var(--gold-soft); outline-offset:3px; }
+
+  footer{ margin-top:clamp(48px,6vw,80px); border-top:1px solid var(--line); padding-top:20px; color:var(--dim); font-size:14px; line-height:1.6; }
+  footer a{ color:var(--cream); text-decoration:none; border-bottom:1px solid var(--line); }
+  footer a:hover{ border-bottom-color:var(--gold); }
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="page"><div class="wrap">
+
+  <div class="rule"></div>
+  <p class="eyebrow">Free tools &middot; no login</p>
+  <h1>Thirteen decisions you can settle in about a minute.</h1>
+  <p class="lede">
+    Most wasted effort in a small company goes on deciding badly, slowly, or not at all.
+    Each of these does one sum or one checklist and gives you an answer you can act on today.
+    <b>Nothing to install, no email, no account.</b> They run entirely in your browser.
+  </p>
+
+  <div class="facts">
+    <span class="fact"><b>13</b> tools</span>
+    <span class="fact"><b>0</b> signups</span>
+    <span class="fact">Your numbers <b>never leave your device</b></span>
+  </div>
+
+  <section class="group">
+    <div class="group-head">
+      <h2>Before you build</h2>
+      <span>Decide the shape of the thing first</span>
+    </div>
+    <div class="grid">
+      <a class="tool" href="./automation-or-agent/">
+        <p class="q">Automation or an AI agent?</p>
+        <p class="name">Automation or agent</p>
+        <p class="desc">Most teams reach for an agent when a boring automation would do the job better and cheaper. Five questions settle it.</p>
+      </a>
+      <a class="tool" href="./ai-payoff-map/">
+        <p class="q">Where do I actually start with AI?</p>
+        <p class="name">The AI payoff map</p>
+        <p class="desc">Drop your ideas on an effort-versus-impact grid and watch them sort into do-first, plan, fill-in, and skip.</p>
+      </a>
+      <a class="tool" href="./automation-readiness/">
+        <p class="q">Is this process even ready to automate?</p>
+        <p class="name">Automation readiness check</p>
+        <p class="desc">Six checks, a score out of 100, and the exact blockers to clear first. Most failed builds fail here.</p>
+      </a>
+      <a class="tool" href="./automation-payback/">
+        <p class="q">Will this automation pay for itself?</p>
+        <p class="name">Automation payback calculator</p>
+        <p class="desc">The hours a task quietly eats every year, against what the build costs once. Payback in weeks, not opinions.</p>
+      </a>
+      <a class="tool" href="./build-vs-buy/">
+        <p class="q">Build it, or just subscribe?</p>
+        <p class="name">Build vs buy break-even</p>
+        <p class="desc">Building costs once, subscribing costs forever. See the exact month building starts to win.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-head">
+      <h2>Money you cannot see</h2>
+      <span>Costs that never arrive as an invoice</span>
+    </div>
+    <div class="grid">
+      <a class="tool" href="./cash-runway/">
+        <p class="q">How long until the cash runs out?</p>
+        <p class="name">Cash runway reality check</p>
+        <p class="desc">Runway in months, plus the date you hit zero. Move a hire or a cut and watch the date move with it.</p>
+      </a>
+      <a class="tool" href="./price-raise-meter/">
+        <p class="q">Can I afford to raise my price?</p>
+        <p class="name">The price-raise meter</p>
+        <p class="desc">How many customers you could lose after a rise before you actually make less money. Usually far more than you think.</p>
+      </a>
+      <a class="tool" href="./discount-damage/">
+        <p class="q">What is this discount really costing me?</p>
+        <p class="name">Discount damage meter</p>
+        <p class="desc">A discount comes off your margin, not your price. See the extra volume you need just to stand still.</p>
+      </a>
+      <a class="tool" href="./meeting-cost/">
+        <p class="q">What does this meeting actually cost?</p>
+        <p class="name">The meeting cost card</p>
+        <p class="desc">A recurring meeting is a recurring invoice nobody ever reads. Four numbers in, real cost out.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-head">
+      <h2>Getting a reply</h2>
+      <span>Outreach and content, scored before you send</span>
+    </div>
+    <div class="grid">
+      <a class="tool" href="./cold-outreach-scorer/">
+        <p class="q">Will this cold message get a reply?</p>
+        <p class="name">Cold outreach scorer</p>
+        <p class="desc">Paste it and get a score out of 100 with the exact reasons it will be ignored, before you hit send.</p>
+      </a>
+      <a class="tool" href="./follow-up-ladder/">
+        <p class="q">How many times should I follow up?</p>
+        <p class="name">The follow-up ladder</p>
+        <p class="desc">Most replies come from the third to fifth touch. Get the schedule, and what to say at each step.</p>
+      </a>
+      <a class="tool" href="./hook-doctor/">
+        <p class="q">Will anyone stop scrolling for this?</p>
+        <p class="name">The hook doctor</p>
+        <p class="desc">Line one is most of the job. Paste your first line and get a live score with the fixes it is missing.</p>
+      </a>
+      <a class="tool" href="./content-calendar/">
+        <p class="q">What do I post for the next month?</p>
+        <p class="name">30-day content calendar</p>
+        <p class="desc">Four weeks of weekday slots, each with a pillar, a format, and a prompt. No more blank-page mornings.</p>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    Built by <a href="https://www.linkedin.com/in/alijlari" rel="me">Ali Lari</a>.
+    I write about handing busywork to AI, with the receipts.
+    Everything here is free to use and free to share.
+  </footer>
+
+</div></div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The cold outreach scorer — will this cold message get a reply, by Ali Lari</title>
+<meta name="description" content="Paste a cold email or DM and get a 0-100 score with the exact reasons it will get ignored, before you hit send." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8; --red:#E5736B;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px }
+  label{ font-size:14px; color:var(--dim); display:block; margin-bottom:8px }
+  textarea{ width:100%; background:var(--navy); border:1px solid var(--line); border-radius:10px; color:var(--cream); font-size:16px; line-height:1.5; font-family:inherit; padding:14px; resize:vertical; min-height:120px }
+  textarea:focus{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .count{ text-align:right; color:var(--grey); font-size:12px; margin-top:6px; font-variant-numeric:tabular-nums }
+  .result{ margin-top:28px }
+  .scorehead{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap }
+  .score{ font-size:clamp(44px,11vw,72px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.02em }
+  .score small{ font-size:.34em; color:var(--dim); font-weight:700 }
+  .chip{ display:inline-flex; font-size:13px; letter-spacing:.06em; text-transform:uppercase; font-weight:700; padding:6px 13px; border-radius:999px; color:var(--navy) }
+  .scorebar{ height:10px; background:var(--navy); border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-top:16px }
+  .scorefill{ height:100%; border-radius:999px; transition:width .35s ease, background .2s }
+  .checks{ margin-top:22px; display:flex; flex-direction:column; gap:10px }
+  .chk{ display:flex; gap:12px; align-items:flex-start }
+  .dot{ width:12px; height:12px; border-radius:50%; margin-top:5px; flex-shrink:0 }
+  .chk .lab{ font-size:16px; color:var(--cream) }
+  .chk .tip{ font-size:14px; color:var(--dim); margin-top:2px; line-height:1.45 }
+  .empty{ color:var(--dim); font-size:16px; margin-top:22px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">Before you hit send</div>
+  <h1>The cold outreach scorer</h1>
+  <p class="sub">Cold messages get ignored for the same five reasons every time. Paste yours and get a score plus the exact reasons it will not get a reply.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card">
+    <label for="msg">Your cold email or DM</label>
+    <textarea id="msg">Hi, I'm reaching out because I wanted to hop on a quick call to tell you about our revolutionary AI platform. Would you be free sometime this week?</textarea>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="result" id="result"></div>
+  <p class="foot">Built by Ali Lari. It scores the message, not the prospect. A great prospect ignores a bad message too.</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var out=$('result');
+
+  // COMPUTE-START cold-outreach (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var t=(v.text||'').trim();
+    if(t.length===0) return {kind:"empty"};
+    var lower=t.toLowerCase();
+    var len=t.length;
+    var hasYou=/\b(you|your|you're|you've)\b/i.test(t);
+    var opensAboutYou=/^(i |i'm|i am|we |we're|we are|my |our |hi[,! ]+i|hello[,! ]+i)/i.test(t);
+    var spam=/(hop on|circle back|touch base|just checking in|quick question|reach(ing)? out|pick your brain|synergy|game[- ]?changer|revolutionary|per my (previous|last)|dear sir|to whom it may|let me introduce)/i.test(lower);
+    var hasAsk=/\?|(would you|are you open|open to|worth a|do you have|can we|could we|15 minutes|quick chat|worth exploring)/i.test(lower);
+    var shortEnough=len<=600;
+    var checks=[
+      {label:"Short enough to read in 10 seconds (under 600 chars)", pass:shortEnough, weight:25, tip:"Cut it hard. Cold messages over a few lines get skimmed and dropped. Aim under 600 characters."},
+      {label:"Opens on them, not on you", pass:(hasYou && !opensAboutYou), weight:20, tip:"Do not open with 'I' or 'We'. Start with something specific about them or their world."},
+      {label:"Talks to the reader directly", pass:hasYou, weight:15, tip:"Reference the reader. 'You' plus a real detail beats a template every time."},
+      {label:"Has one clear, low-friction ask", pass:hasAsk, weight:20, tip:"End on a single easy ask. One question they can say yes to, not a demand for a meeting."},
+      {label:"No cold-email cliches", pass:!spam, weight:20, tip:"Strip the tells: 'just checking in', 'circle back', 'hop on a call', 'pick your brain', 'revolutionary'."}
+    ];
+    var score=0; for(var i=0;i<checks.length;i++){ if(checks[i].pass) score+=checks[i].weight; }
+    var verdict = score>=70 ? "Worth sending" : score>=40 ? "Needs a rewrite" : "Delete and restart";
+    var band = score>=70 ? "teal" : score>=40 ? "gold" : "red";
+    return {kind:"ok", score:score, verdict:verdict, band:band, checks:checks.map(function(c){return {label:c.label,pass:c.pass,tip:c.tip};})};
+  }
+  // COMPUTE-END
+
+  var bandColor={teal:"var(--teal)", gold:"var(--gold)", red:"var(--red)"};
+  function render(){
+    var text=$('msg').value;
+    $('count').textContent=text.length+" characters";
+    var r=compute({text:text});
+    if(r.kind==="empty"){ out.innerHTML='<p class="empty">Paste a message above to score it.</p>'; return; }
+    var col=bandColor[r.band];
+    var checksHtml=r.checks.map(function(c){
+      return '<div class="chk"><span class="dot" style="background:'+(c.pass?'var(--teal)':'var(--red)')+'"></span>'+
+        '<div><div class="lab">'+c.label+'</div>'+(c.pass?'':'<div class="tip">'+c.tip+'</div>')+'</div></div>';
+    }).join('');
+    out.innerHTML=
+      '<div class="scorehead"><div class="score" style="color:'+col+'">'+r.score+'<small> / 100</small></div>'+
+        '<span class="chip" style="background:'+col+'">'+r.verdict+'</span></div>'+
+      '<div class="scorebar"><div class="scorefill" style="width:'+r.score+'%;background:'+col+'"></div></div>'+
+      '<div class="checks">'+checksHtml+'</div>';
+  }
+  $('msg').addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>

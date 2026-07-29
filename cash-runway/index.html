@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The cash runway reality check — how long until zero, by Ali Lari</title>
+<meta name="description" content="The one founder number that matters. See your runway in months, and watch a single hire or cut move the date you run out of cash." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8; --red:#E5736B;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px }
+  .field{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px } .field.last{ margin-bottom:0 }
+  label{ font-size:14px; color:var(--dim) } label .hint{ color:var(--grey); font-size:12px }
+  .money{ position:relative } .money span{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--dim); font-size:16px }
+  input[type=number]{ width:100%; background:var(--navy); border:1px solid var(--line); border-radius:10px; color:var(--cream); font-size:17px; font-family:inherit; padding:12px 14px; -moz-appearance:textfield }
+  input.money-in{ padding-left:30px }
+  input[type=number]:focus{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .slider-row{ display:flex; align-items:center; justify-content:space-between }
+  .slider-val{ font-weight:700; font-size:17px; font-variant-numeric:tabular-nums }
+  input[type=range]{ width:100%; accent-color:var(--gold); margin-top:6px }
+  .result{ margin-top:28px }
+  .big{ font-size:clamp(36px,8.5vw,60px); font-weight:800; letter-spacing:-.02em; line-height:1.05; text-wrap:balance }
+  .big b{ color:var(--teal) } .big.danger b{ color:var(--red) }
+  .timeline{ margin-top:22px }
+  .tl-track{ position:relative; height:20px; background:var(--navy); border:1px solid var(--line); border-radius:999px; overflow:hidden }
+  .tl-fill{ height:100%; background:var(--teal); border-radius:999px; transition:width .35s ease }
+  .tl-scale{ display:flex; justify-content:space-between; color:var(--grey); font-size:12px; margin-top:6px }
+  .tiles{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px }
+  .tile{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px }
+  .tile .v{ font-size:22px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em }
+  .tile .l{ color:var(--dim); font-size:13px; margin-top:4px }
+  .callout{ background:var(--card); border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:0 12px 12px 0; padding:16px 18px; margin-top:22px }
+  .callout .lab{ color:var(--gold); font-size:12px; letter-spacing:.12em; text-transform:uppercase } .callout p{ margin:7px 0 0; font-size:16px; line-height:1.5 }
+  .invalid{ color:var(--dim); font-size:16px; margin-top:22px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">The only number that matters</div>
+  <h1>The cash runway reality check</h1>
+  <p class="sub">Runway is the founder number everything else rolls up into. See yours in months, then drag one hire or cut and watch the zero-cash date move.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card">
+    <div class="field">
+      <label for="cash">Cash in the bank</label>
+      <div class="money"><span>$</span><input id="cash" class="money-in" type="number" min="0" step="1000" value="200000" /></div>
+    </div>
+    <div class="field">
+      <label for="rev">Monthly revenue <span class="hint">what comes in</span></label>
+      <div class="money"><span>$</span><input id="rev" class="money-in" type="number" min="0" step="1000" value="30000" /></div>
+    </div>
+    <div class="field">
+      <label for="cost">Monthly costs <span class="hint">what goes out</span></label>
+      <div class="money"><span>$</span><input id="cost" class="money-in" type="number" min="0" step="1000" value="45000" /></div>
+    </div>
+    <div class="field last">
+      <label for="adj">Try a change</label>
+      <div class="slider-row"><span style="color:var(--dim);font-size:13px">add a hire (right) or make a cut (left)</span><span class="slider-val" id="adjVal">$0</span></div>
+      <input id="adj" type="range" min="-20000" max="20000" step="500" value="0" />
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+  <p class="foot">Built by Ali Lari. The runway number is worth checking before the hire, not after.</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var out=$('result');
+  function n(id){ var v=parseFloat($(id).value); return isNaN(v)?0:v; }
+
+  // COMPUTE-START cash-runway (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var cash=v.cash, rev=v.rev, cost=v.cost, adj=v.adj;
+    if(!(cash>0)) return {kind:"invalid", msg:"Enter your cash in the bank."};
+    var burn=(cost+adj)-rev; // monthly net burn; positive = losing money
+    if(burn<=0) return {kind:"profitable", surplus:-burn};
+    return {kind:"ok", months:cash/burn, burn:burn};
+  }
+  // COMPUTE-END
+
+  function money(x){ return '$'+Math.round(x).toLocaleString('en-US'); }
+  function adjText(a){ if(a>0) return '+'+money(a)+' / mo'; if(a<0) return money(a)+' / mo'; return '$0'; }
+  function zeroDate(months){ var d=new Date(); d.setMonth(d.getMonth()+Math.floor(months)); return d.toLocaleDateString('en-US',{month:'short', year:'numeric'}); }
+  function render(){
+    $('adjVal').textContent=adjText(n('adj'));
+    var r=compute({cash:n('cash'), rev:n('rev'), cost:n('cost'), adj:n('adj')});
+    if(r.kind==="invalid"){ out.innerHTML='<p class="invalid">'+r.msg+'</p>'; return; }
+    if(r.kind==="profitable"){
+      out.innerHTML='<div class="big">You are cash-flow positive. At these numbers you add <b>'+money(r.surplus)+'</b> a month, so there is no runway clock.</div>'+
+        '<div class="callout"><div class="lab">What this means</div><p>The runway question flips into a growth question. The slider still shows you how much room a hire eats before it tips you back into burning.</p></div>';
+      return;
+    }
+    var months=r.months, capped=Math.min(months,24), danger=months<6;
+    var fillPct=(capped/24*100).toFixed(1);
+    out.innerHTML=
+      '<div class="big'+(danger?' danger':'')+'">'+(months>=24?'Over ':'')+'<b>'+(months>=24?'24':Math.round(months))+' months</b> of runway'+(months>=24?'':', to about '+zeroDate(months))+'.</div>'+
+      '<div class="timeline"><div class="tl-track"><div class="tl-fill" style="width:'+fillPct+'%'+(danger?';background:var(--red)':'')+'"></div></div>'+
+        '<div class="tl-scale"><span>now</span><span>12 mo</span><span>24 mo+</span></div></div>'+
+      '<div class="tiles">'+
+        '<div class="tile"><div class="v">'+money(r.burn)+'</div><div class="l">net burn a month</div></div>'+
+        '<div class="tile"><div class="v">'+(months>=24?'24+ mo':zeroDate(months))+'</div><div class="l">cash hits zero</div></div>'+
+      '</div>'+
+      '<div class="callout"><div class="lab">What this means</div><p>'+(danger?'Under six months is the danger zone. Every decision now is really a runway decision.':'Drag the slider. A single '+money(6000)+' hire is not a line item, it is weeks off the clock. That is the real price of the decision.')+'</p></div>';
+  }
+  ['cash','rev','cost','adj'].forEach(function(id){ $(id).addEventListener('input', render); });
+  render();
+})();
+</script>
+</body>
+</html>

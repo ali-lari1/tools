@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The follow-up ladder — a reply comes from the sequence, not the first message, by Ali Lari</title>
+<meta name="description" content="Most replies come from the third to fifth touch, not the first. Pick a start date and get a follow-up schedule with what to actually say at each step." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px; display:grid; grid-template-columns:1fr 1fr; gap:16px }
+  .field{ display:flex; flex-direction:column; gap:7px } label{ font-size:14px; color:var(--dim) }
+  input[type=date]{ width:100%; background:var(--navy); border:1px solid var(--line); border-radius:10px; color:var(--cream); font-size:16px; font-family:inherit; padding:12px 14px }
+  input:focus{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .slider-row{ display:flex; align-items:center; justify-content:space-between } .slider-row b{ color:var(--gold); font-variant-numeric:tabular-nums }
+  input[type=range]{ width:100%; accent-color:var(--gold); margin-top:4px }
+  .result{ margin-top:26px }
+  .rung{ display:flex; gap:14px; margin-bottom:4px }
+  .rail{ display:flex; flex-direction:column; align-items:center }
+  .node{ width:30px; height:30px; border-radius:50%; background:var(--gold); color:var(--navy); font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0 }
+  .line{ width:2px; flex:1; background:var(--line); margin:4px 0 }
+  .rung:last-child .line{ display:none }
+  .body{ padding-bottom:18px; flex:1 }
+  .rhead{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px }
+  .day{ font-size:14px; color:var(--cream); font-weight:600; font-variant-numeric:tabular-nums }
+  .date{ font-size:13px; color:var(--dim) }
+  .label{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:var(--gold-soft); color:var(--navy) }
+  .intent{ font-size:15px; color:var(--cream); line-height:1.45 }
+  .note{ color:var(--dim); font-size:14px; margin-top:8px }
+  .invalid{ color:var(--dim); font-size:16px; margin-top:22px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">The reply is in the sequence</div>
+  <h1>The follow-up ladder</h1>
+  <p class="sub">Most replies come from the third to fifth message, not the first, yet most people send one and give up. Pick a start date and get the schedule, plus what to actually say at each step.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card">
+    <div class="field"><label for="start">Date of your first message</label><input id="start" type="date" /></div>
+    <div class="field"><label for="touches">How persistent</label><div class="slider-row"><span style="color:var(--dim);font-size:13px">total touches</span><b id="tVal">5</b></div><input id="touches" type="range" min="2" max="6" step="1" value="5" /></div>
+  </div>
+
+  <div class="result" id="result"></div>
+  <p class="foot">Built by Ali Lari. Every touch adds a new angle or a piece of value. None of them just says "just following up".</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+
+  // COMPUTE-START follow-up-ladder (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var start=v.start, touches=v.touches||5;
+    if(!start || !/^\d{4}-\d{2}-\d{2}$/.test(start)) return {kind:"invalid", msg:"Pick the date of your first message."};
+    var d0=new Date(start+"T00:00:00Z");
+    if(isNaN(d0.getTime())) return {kind:"invalid", msg:"Pick a valid date."};
+    var offsets=[0,3,7,12,18,25];
+    var labels=["Opener","Bump","Reframe","Proof","Breakup","Long game"];
+    var intents=[
+      "The opener. One specific reason you are reaching out, and one small ask.",
+      "Short bump. Add a new angle or a piece of value. Do not just say 'following up'.",
+      "The reframe. Try a different benefit, or a different person, in case the first one missed.",
+      "The proof. Share a quick result or example with no ask. Just be useful.",
+      "The breakup. Say you will stop reaching out and leave the door open. This one often gets the most replies.",
+      "The long game. Move them to a slow list and check back next quarter."
+    ];
+    var n=Math.max(2, Math.min(6, touches));
+    var rungs=[];
+    for(var i=0;i<n;i++){
+      var dt=new Date(d0.getTime()+offsets[i]*86400000);
+      if(dt.getUTCDay()===6) dt=new Date(dt.getTime()+2*86400000);
+      else if(dt.getUTCDay()===0) dt=new Date(dt.getTime()+86400000);
+      rungs.push({ touch:i+1, day:offsets[i], date:dt.toISOString().slice(0,10), dow:dt.getUTCDay(), label:labels[i], intent:intents[i] });
+    }
+    return {kind:"ok", rungs:rungs, spanDays:offsets[n-1] };
+  }
+  // COMPUTE-END
+
+  var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  function render(){
+    $('tVal').textContent=$('touches').value;
+    var r=compute({start:$('start').value, touches:+$('touches').value});
+    if(r.kind==="invalid"){ $('result').innerHTML='<p class="invalid">'+r.msg+'</p>'; return; }
+    var html=r.rungs.map(function(s){
+      var p=s.date.split('-');
+      return '<div class="rung"><div class="rail"><div class="node">'+s.touch+'</div><div class="line"></div></div>'+
+        '<div class="body"><div class="rhead"><span class="day">Day '+s.day+'</span><span class="date">'+DAYS[s.dow]+' '+p[2]+'/'+p[1]+'</span><span class="label">'+s.label+'</span></div>'+
+        '<div class="intent">'+s.intent+'</div></div></div>';
+    }).join('');
+    html+='<p class="note">The whole sequence runs about '+r.spanDays+' days. Persistent, not annoying: every message earns its place.</p>';
+    $('result').innerHTML=html;
+  }
+  try{ $('start').value=new Date().toISOString().slice(0,10); }catch(e){}
+  $('start').addEventListener('input', render);
+  $('touches').addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>

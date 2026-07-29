@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The meeting cost card — what your recurring meeting really costs, by Ali Lari</title>
+<meta name="description" content="A recurring meeting is a recurring invoice you never see. Put in four numbers and get the real cost per meeting and per year." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
+  .field{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px } .field.last{ margin-bottom:0 }
+  label{ font-size:14px; color:var(--dim) } label .hint{ color:var(--grey); font-size:12px }
+  .money{ position:relative } .money span{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--dim); font-size:16px }
+  input[type=number]{ width:100%; background:var(--navy); border:1px solid var(--line); border-radius:10px; color:var(--cream); font-size:17px; font-family:inherit; padding:12px 14px; -moz-appearance:textfield }
+  input.money-in{ padding-left:30px }
+  input[type=number]:focus{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .result{ margin-top:28px }
+  .big{ font-size:clamp(38px,9vw,64px); font-weight:800; letter-spacing:-.02em; line-height:1; font-variant-numeric:tabular-nums }
+  .biglab{ color:var(--dim); font-size:15px; margin-top:6px }
+  .tiles{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:22px }
+  .tile{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px }
+  .tile .v{ font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em }
+  .tile .l{ color:var(--dim); font-size:13px; margin-top:4px }
+  .callout{ background:var(--card); border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:0 12px 12px 0; padding:16px 18px; margin-top:22px }
+  .callout .lab{ color:var(--gold); font-size:12px; letter-spacing:.12em; text-transform:uppercase } .callout p{ margin:7px 0 0; font-size:16px; line-height:1.5 }
+  .invalid{ color:var(--dim); font-size:16px; margin-top:22px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">Before you schedule it again</div>
+  <h1>The meeting cost card</h1>
+  <p class="sub">A recurring meeting is a recurring invoice nobody ever sees. Put in four numbers and find out what that weekly sync actually costs.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card">
+    <div class="grid2">
+      <div class="field">
+        <label for="att">People in the room</label>
+        <input id="att" type="number" min="0" step="1" value="6" />
+      </div>
+      <div class="field">
+        <label for="mins">Length <span class="hint">minutes</span></label>
+        <input id="mins" type="number" min="0" step="5" value="30" />
+      </div>
+      <div class="field">
+        <label for="rate">Average hourly cost <span class="hint">loaded</span></label>
+        <div class="money"><span>$</span><input id="rate" class="money-in" type="number" min="0" step="5" value="75" /></div>
+      </div>
+      <div class="field last">
+        <label for="freq">Times per week</label>
+        <input id="freq" type="number" min="0" step="1" value="1" />
+      </div>
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+  <p class="foot">Built by Ali Lari. Drop it in the calendar invite for that meeting nobody defends.</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var out=$('result');
+  function n(id){ var v=parseFloat($(id).value); return isNaN(v)?0:v; }
+
+  // COMPUTE-START meeting-cost (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var att=v.att, rate=v.rate, mins=v.mins, freq=v.freq;
+    if(!(att>0)||!(rate>0)||!(mins>0)||!(freq>0)) return {kind:"invalid", msg:"Fill in all four numbers to see the cost."};
+    var hoursPer=att*(mins/60);
+    var perMeeting=hoursPer*rate;
+    var perYear=perMeeting*freq*52;
+    var personHoursYear=hoursPer*freq*52;
+    return {kind:"ok", perMeeting:perMeeting, perYear:perYear, personHoursYear:personHoursYear};
+  }
+  // COMPUTE-END
+
+  function money(x){ return '$'+Math.round(x).toLocaleString('en-US'); }
+  function render(){
+    var r=compute({att:n('att'), rate:n('rate'), mins:n('mins'), freq:n('freq')});
+    if(r.kind==="invalid"){ out.innerHTML='<p class="invalid">'+r.msg+'</p>'; return; }
+    out.innerHTML=
+      '<div class="big">'+money(r.perMeeting)+'</div><div class="biglab">every single time it runs</div>'+
+      '<div class="tiles">'+
+        '<div class="tile"><div class="v">'+money(r.perYear)+'</div><div class="l">a year, if it is weekly</div></div>'+
+        '<div class="tile"><div class="v">'+Math.round(r.personHoursYear).toLocaleString('en-US')+' hrs</div><div class="l">of people-time a year</div></div>'+
+      '</div>'+
+      '<div class="callout"><div class="lab">What this means</div><p>You would question a '+money(r.perYear)+' invoice. This is the same money, spent in slices small enough that nobody notices. If the meeting is not worth that number, shorten it, shrink the room, or drop it.</p></div>';
+  }
+  ['att','rate','mins','freq'].forEach(function(id){ $(id).addEventListener('input', render); });
+  render();
+})();
+</script>
+</body>
+</html>

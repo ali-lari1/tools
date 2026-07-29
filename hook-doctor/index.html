@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The hook doctor — score your LinkedIn first line, by Ali Lari</title>
+<meta name="description" content="Line one is 80% of the job. Paste your LinkedIn hook and get a live 0-100 score with the exact fixes that make people stop scrolling." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8; --red:#E5736B;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px }
+  label{ font-size:14px; color:var(--dim); display:block; margin-bottom:8px }
+  textarea{ width:100%; background:var(--navy); border:1px solid var(--line); border-radius:10px; color:var(--cream); font-size:17px; line-height:1.5; font-family:inherit; padding:14px; resize:vertical; min-height:96px }
+  textarea:focus{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .count{ text-align:right; color:var(--grey); font-size:12px; margin-top:6px; font-variant-numeric:tabular-nums }
+  .result{ margin-top:28px }
+  .scorehead{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap }
+  .score{ font-size:clamp(44px,11vw,72px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.02em }
+  .score small{ font-size:.34em; color:var(--dim); font-weight:700 }
+  .chip{ display:inline-flex; font-size:13px; letter-spacing:.06em; text-transform:uppercase; font-weight:700; padding:6px 13px; border-radius:999px; color:var(--navy) }
+  .scorebar{ height:10px; background:var(--navy); border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-top:16px }
+  .scorefill{ height:100%; border-radius:999px; transition:width .35s ease, background .2s }
+  .checks{ margin-top:22px; display:flex; flex-direction:column; gap:10px }
+  .chk{ display:flex; gap:12px; align-items:flex-start }
+  .dot{ width:12px; height:12px; border-radius:50%; margin-top:5px; flex-shrink:0 }
+  .chk .lab{ font-size:16px; color:var(--cream) }
+  .chk .tip{ font-size:14px; color:var(--dim); margin-top:2px; line-height:1.45 }
+  .empty{ color:var(--dim); font-size:16px; margin-top:22px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">Line one is 80% of the job</div>
+  <h1>The hook doctor</h1>
+  <p class="sub">On LinkedIn, most people only read your first line before deciding to scroll. Paste your hook and get a live score with the exact fixes.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card">
+    <label for="hook">Your hook (the first line of the post)</label>
+    <textarea id="hook">I'm excited to share some thoughts on AI tools for your business.</textarea>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="result" id="result"></div>
+  <p class="foot">Built by Ali Lari. The scoring is the same checklist my own posting system runs before anything ships.</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var out=$('result');
+
+  // COMPUTE-START hook-doctor (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var t=(v.text||'').trim();
+    if(t.length===0) return {kind:"empty"};
+    var firstLine=t.split('\n')[0];
+    var lower=t.toLowerCase();
+    var len=firstLine.length;
+    var slop=/(—|\bnot just\b|\bdelve\b|\btapestry\b|\btestament\b|\bseamless\b|\brobust\b|\bvibrant\b|\brealm\b|\bfoster\b)/i.test(t);
+    var weakOpener=/^\s*(in this post|excited to|i'?m (excited|thrilled|happy) to|i am (excited|thrilled|happy) to|today i (want|wanted) to|hey (everyone|guys|all)|let'?s talk about)/i.test(t);
+    var hasNumber=/\d/.test(firstLine);
+    var hasYou=/\b(you|your)\b/i.test(firstLine);
+    var tension=/\b(stop|nobody|most|wrong|myth|actually|truth|mistake|never|everyone|why|secret|unpopular|hard truth)\b/i.test(lower);
+    var lenOk=len>=20 && len<=140;
+    var checks=[
+      {label:"Fits the mobile fold (under 140 characters)", pass:lenOk, weight:25, tip: len>140 ? ("Line one is "+len+" characters. Cut it under 140 so the whole hook shows before the 'see more' fold.") : "Line one is very short. Give it enough to create a reason to keep reading."},
+      {label:"Has a specific number", pass:hasNumber, weight:15, tip:"Add a real number. Specific beats vague, and digits stop the eye."},
+      {label:"Talks to the reader ('you')", pass:hasYou, weight:15, tip:"Point it at the reader. 'You' pulls harder than 'I' or 'we'."},
+      {label:"No AI-slop or em dashes", pass:!slop, weight:20, tip:"Strip the tells: em dashes, 'not just X', and words like delve, seamless, robust, vibrant."},
+      {label:"Opens strong, no warm-up", pass:!weakOpener, weight:10, tip:"Cut the throat-clearing. Start on the sharpest thing you have to say, not 'excited to share'."},
+      {label:"Creates tension or a claim", pass:tension, weight:15, tip:"Make a claim or challenge a belief. A neutral, informational first line gets scrolled."}
+    ];
+    var score=0; for(var i=0;i<checks.length;i++){ if(checks[i].pass) score+=checks[i].weight; }
+    var verdict = score>=70 ? "Strong hook" : score>=40 ? "Getting there" : "Needs work";
+    var band = score>=70 ? "teal" : score>=40 ? "gold" : "red";
+    return {kind:"ok", score:score, verdict:verdict, band:band, len:len,
+      checks:checks.map(function(c){ return {label:c.label, pass:c.pass, tip:c.tip}; })};
+  }
+  // COMPUTE-END
+
+  var bandColor={teal:"var(--teal)", gold:"var(--gold)", red:"var(--red)"};
+  function render(){
+    var text=$('hook').value;
+    $('count').textContent=(text.split('\n')[0]||'').length+" characters on line one";
+    var r=compute({text:text});
+    if(r.kind==="empty"){ out.innerHTML='<p class="empty">Paste a hook above to score it.</p>'; return; }
+    var col=bandColor[r.band];
+    var checksHtml=r.checks.map(function(c){
+      return '<div class="chk"><span class="dot" style="background:'+(c.pass?'var(--teal)':'var(--red)')+'"></span>'+
+        '<div><div class="lab">'+c.label+'</div>'+(c.pass?'':'<div class="tip">'+c.tip+'</div>')+'</div></div>';
+    }).join('');
+    out.innerHTML=
+      '<div class="scorehead"><div class="score" style="color:'+col+'">'+r.score+'<small> / 100</small></div>'+
+        '<span class="chip" style="background:'+col+'">'+r.verdict+'</span></div>'+
+      '<div class="scorebar"><div class="scorefill" style="width:'+r.score+'%;background:'+col+'"></div></div>'+
+      '<div class="checks">'+checksHtml+'</div>';
+  }
+  $('hook').addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>

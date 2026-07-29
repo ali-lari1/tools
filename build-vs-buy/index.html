@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Build vs buy break-even — when does building beat subscribing, by Ali Lari</title>
+<meta name="description" content="Building has an upfront cost, buying is forever. See the exact month building starts to win, and whether you will actually use it that long." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8; --red:#E5736B;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
+  .field{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px } .field.last{ margin-bottom:0 }
+  label{ font-size:14px; color:var(--dim) } label .hint{ color:var(--grey); font-size:12px }
+  .money{ position:relative } .money span{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--dim); font-size:16px }
+  input[type=number]{ width:100%; background:var(--navy); border:1px solid var(--line); border-radius:10px; color:var(--cream); font-size:17px; font-family:inherit; padding:12px 14px; -moz-appearance:textfield }
+  input.money-in{ padding-left:30px }
+  input[type=number]:focus{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .slider-row{ display:flex; align-items:center; justify-content:space-between }
+  .slider-val{ color:var(--gold); font-weight:700; font-size:17px; font-variant-numeric:tabular-nums }
+  input[type=range]{ width:100%; accent-color:var(--gold); margin-top:6px }
+  .result{ margin-top:28px }
+  .big{ font-size:clamp(32px,7.5vw,52px); font-weight:800; letter-spacing:-.02em; line-height:1.08; text-wrap:balance }
+  .big b{ color:var(--teal) }
+  .tiles{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:22px }
+  .tile{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px }
+  .tile .v{ font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em }
+  .tile .l{ color:var(--dim); font-size:13px; margin-top:4px }
+  .bars{ margin-top:20px }
+  .bar-row{ margin-bottom:12px }
+  .bar-top{ display:flex; justify-content:space-between; font-size:14px; color:var(--dim); margin-bottom:6px } .bar-top b{ color:var(--cream); font-variant-numeric:tabular-nums }
+  .track{ height:14px; background:var(--navy); border:1px solid var(--line); border-radius:999px; overflow:hidden }
+  .fill{ height:100%; border-radius:999px; transition:width .35s ease }
+  .callout{ background:var(--card); border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:0 12px 12px 0; padding:16px 18px; margin-top:22px }
+  .callout .lab{ color:var(--gold); font-size:12px; letter-spacing:.12em; text-transform:uppercase } .callout p{ margin:7px 0 0; font-size:16px; line-height:1.5 }
+  .invalid{ color:var(--dim); font-size:16px; margin-top:22px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">Build vs buy</div>
+  <h1>The build vs buy break-even</h1>
+  <p class="sub">Building costs a lump up front and a little to run. Buying costs a little forever. See the month building starts to win, and be honest about whether you will use it that long.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card">
+    <div class="grid2">
+      <div class="field">
+        <label for="up">Cost to build it once <span class="hint">upfront</span></label>
+        <div class="money"><span>$</span><input id="up" class="money-in" type="number" min="0" step="100" value="8000" /></div>
+      </div>
+      <div class="field">
+        <label for="bm">To run your build <span class="hint">per month</span></label>
+        <div class="money"><span>$</span><input id="bm" class="money-in" type="number" min="0" step="10" value="200" /></div>
+      </div>
+      <div class="field">
+        <label for="sub">The tool you'd buy <span class="hint">per month</span></label>
+        <div class="money"><span>$</span><input id="sub" class="money-in" type="number" min="0" step="10" value="800" /></div>
+      </div>
+      <div class="field last">
+        <label for="hz">How long you'll use it</label>
+        <div class="slider-row"><span style="color:var(--dim);font-size:13px">months</span><span class="slider-val" id="hzVal">12</span></div>
+        <input id="hz" type="range" min="1" max="36" step="1" value="12" />
+      </div>
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+  <p class="foot">Built by Ali Lari. Run it before the next "we could just build this" conversation.</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var out=$('result');
+  function n(id){ var v=parseFloat($(id).value); return isNaN(v)?0:v; }
+
+  // COMPUTE-START build-vs-buy (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var up=v.buildUpfront, bm=v.buildMonthly, sub=v.buyMonthly, H=v.horizon;
+    if(!(sub>0)) return {kind:"invalid", msg:"Enter the monthly price of the tool you would buy."};
+    var buildAtH=up+bm*H, buyAtH=sub*H, diffMonthly=sub-bm;
+    var neverPaysBack = !(diffMonthly>0);
+    var breakEven = neverPaysBack ? Infinity : up/diffMonthly;
+    var cheaperAtH = buildAtH<buyAtH ? "build" : buildAtH>buyAtH ? "buy" : "tie";
+    return {kind:"ok", buildAtH:buildAtH, buyAtH:buyAtH, breakEven:breakEven, neverPaysBack:neverPaysBack, horizon:H, cheaperAtH:cheaperAtH};
+  }
+  // COMPUTE-END
+
+  function money(x){ return '$'+Math.round(x).toLocaleString('en-US'); }
+  function render(){
+    $('hzVal').textContent=Math.round(n('hz'));
+    var r=compute({buildUpfront:n('up'), buildMonthly:n('bm'), buyMonthly:n('sub'), horizon:n('hz')});
+    if(r.kind==="invalid"){ out.innerHTML='<p class="invalid">'+r.msg+'</p>'; return; }
+    var head, note;
+    if(r.neverPaysBack){
+      head='Just buy it. <b>Building never catches up.</b>';
+      note='Your build would cost as much or more to run every month, on top of the money to build it. There is no month where it wins. Buy the tool.';
+    } else {
+      var be=Math.ceil(r.breakEven);
+      head='Building wins after <b>'+be+' months</b>.';
+      note = r.horizon>=be
+        ? 'You said you will use it for '+r.horizon+' months, which is past the break-even. Over that span, building is the cheaper call.'
+        : 'You said you will use it for '+r.horizon+' months, short of the '+be+'-month break-even. For that horizon, buying is cheaper. Building only pays off if you keep it longer.';
+    }
+    var max=Math.max(r.buildAtH, r.buyAtH, 1);
+    out.innerHTML=
+      '<div class="big">'+head+'</div>'+
+      '<div class="tiles">'+
+        '<div class="tile"><div class="v">'+money(r.buildAtH)+'</div><div class="l">to build, over '+r.horizon+' months</div></div>'+
+        '<div class="tile"><div class="v">'+money(r.buyAtH)+'</div><div class="l">to buy, over '+r.horizon+' months</div></div>'+
+      '</div>'+
+      '<div class="bars">'+
+        '<div class="bar-row"><div class="bar-top"><span>Build, cumulative</span><b>'+money(r.buildAtH)+'</b></div><div class="track"><div class="fill" style="width:'+(r.buildAtH/max*100).toFixed(1)+'%;background:'+(r.cheaperAtH==="build"?"var(--teal)":"var(--gold)")+'"></div></div></div>'+
+        '<div class="bar-row"><div class="bar-top"><span>Buy, cumulative</span><b>'+money(r.buyAtH)+'</b></div><div class="track"><div class="fill" style="width:'+(r.buyAtH/max*100).toFixed(1)+'%;background:'+(r.cheaperAtH==="buy"?"var(--teal)":"var(--gold)")+'"></div></div></div>'+
+      '</div>'+
+      '<div class="callout"><div class="lab">What this means</div><p>'+note+' The trap is comparing the build price to one month of subscription. Compare total cost across how long you will really use it.</p></div>';
+  }
+  ['up','bm','sub','hz'].forEach(function(id){ $(id).addEventListener('input', render); });
+  render();
+})();
+</script>
+</body>
+</html>

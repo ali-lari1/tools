@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The price-raise meter — how many customers can you afford to lose? by Ali Lari</title>
+<meta name="description" content="Raise your price and instantly see how many customers you could lose before you actually make less money. Most founders under-price out of fear." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px }
+  .field{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px }
+  .field:last-child{ margin-bottom:4px }
+  label{ font-size:14px; color:var(--dim) }
+  label .hint{ color:var(--grey); font-size:12px }
+  .money{ position:relative }
+  .money span{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--dim); font-size:16px }
+  input[type=number]{ width:100%; background:var(--navy); border:1px solid var(--line); border-radius:10px; color:var(--cream); font-size:17px; font-family:inherit; padding:12px 14px 12px 30px; -moz-appearance:textfield }
+  input[type=number].plain{ padding-left:14px }
+  input[type=number]:focus{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .slider-row{ display:flex; align-items:center; justify-content:space-between }
+  .slider-val{ color:var(--gold); font-weight:700; font-size:17px; font-variant-numeric:tabular-nums }
+  input[type=range]{ width:100%; accent-color:var(--gold); margin-top:6px }
+  .result{ margin-top:28px; text-align:center }
+  .gauge{ display:block; margin:0 auto }
+  .big{ font-size:clamp(40px,10vw,68px); font-weight:800; letter-spacing:-.02em; line-height:1; font-variant-numeric:tabular-nums }
+  .big small{ font-size:.42em; font-weight:700; color:var(--dim); letter-spacing:0 }
+  .headline{ font-size:19px; line-height:1.5; margin:14px auto 0; max-width:44ch; color:var(--cream) }
+  .headline b{ color:var(--gold-soft) }
+  .callout{ text-align:left; background:var(--card); border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:0 12px 12px 0; padding:16px 18px; margin-top:22px }
+  .callout .lab{ color:var(--gold); font-size:12px; letter-spacing:.12em; text-transform:uppercase }
+  .callout p{ margin:7px 0 0; font-size:16px; line-height:1.5 }
+  .invalid{ color:var(--dim); font-size:16px; margin-top:22px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">Pricing courage</div>
+  <h1>The price-raise meter</h1>
+  <p class="sub">Founders under-price out of fear. Put in your numbers and see exactly how many customers you could lose before a price rise actually costs you money.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card">
+    <div class="field">
+      <label for="price">Current price per customer <span class="hint">what one customer pays</span></label>
+      <div class="money"><span>$</span><input id="price" type="number" min="0" step="1" value="100" /></div>
+    </div>
+    <div class="field">
+      <label for="cost">Your cost to serve one <span class="hint">variable cost per customer</span></label>
+      <div class="money"><span>$</span><input id="cost" type="number" min="0" step="1" value="40" /></div>
+    </div>
+    <div class="field">
+      <label for="qty">Customers today <span class="hint">or monthly units sold</span></label>
+      <input id="qty" class="plain" type="number" min="1" step="1" value="200" />
+    </div>
+    <div class="field">
+      <label for="inc">Price increase</label>
+      <div class="slider-row"><span style="color:var(--dim);font-size:13px">how much you raise it</span><span class="slider-val" id="incVal">10%</span></div>
+      <input id="inc" type="range" min="1" max="50" step="1" value="10" />
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <p class="foot">Built by Ali Lari. Send it to a founder who is scared to raise their prices.</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var out=$('result');
+  var ARC=289.03; // length of the semicircle path r=92
+  function n(id){ var v=parseFloat($(id).value); return isNaN(v)?0:v; }
+  function fmt(x){ return Math.round(x).toLocaleString('en-US'); }
+  function gauge(frac){
+    var f=Math.max(0,Math.min(1,frac));
+    var dash=(f*ARC).toFixed(1);
+    return '<svg class="gauge" width="240" height="140" viewBox="0 0 220 140" aria-hidden="true">'+
+      '<path d="M18,120 A92,92 0 0 1 202,120" fill="none" stroke="#243554" stroke-width="16" stroke-linecap="round"/>'+
+      '<path d="M18,120 A92,92 0 0 1 202,120" fill="none" stroke="#5DCAA5" stroke-width="16" stroke-linecap="round" stroke-dasharray="'+dash+' 1000"/>'+
+      '</svg>';
+  }
+  function invalid(msg){ out.innerHTML='<p class="invalid">'+msg+'</p>'; }
+  // COMPUTE-START price-raise (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var P=v.price, C=v.cost, Q=v.qty, inc=v.inc/100;
+    var marginNow=P-C, P2=P*(1+inc), margin2=P2-C;
+    if(!(P>0)||!(Q>0)) return {kind:"invalid", msg:"Enter your price and how many customers you have."};
+    if(marginNow<=0) return {kind:"invalid", msg:"Your cost to serve is at or above your price. Fix that before raising it."};
+    if(inc<=0) return {kind:"invalid", msg:"Move the slider to raise the price."};
+    var Q2=marginNow*Q/margin2, canLose=Q-Q2, pct=canLose/Q;
+    return {kind:"ok", canLose:canLose, pct:pct, oneIn:(pct>0?Math.max(2,Math.round(1/pct)):0), upside:(margin2-marginNow)*Q, Q:Q, incPct:v.inc};
+  }
+  // COMPUTE-END
+  function render(){
+    $('incVal').textContent=Math.round(n('inc'))+'%';
+    var r=compute({price:n('price'), cost:n('cost'), qty:n('qty'), inc:n('inc')});
+    if(r.kind==="invalid"){ return invalid(r.msg); }
+    out.innerHTML =
+      gauge(r.pct/0.5)+
+      '<div class="big">'+Math.round(r.pct*100)+'<small>% of customers</small></div>'+
+      '<p class="headline">You could lose <b>'+fmt(r.canLose)+'</b> of your '+fmt(r.Q)+' customers and still make the same profit at the higher price.</p>'+
+      '<div class="callout"><div class="lab">What this means</div>'+
+      '<p>A '+Math.round(r.incPct)+'% rise means even if 1 in '+r.oneIn+' customers walks away, you break even. Keep them all and you make about $'+fmt(r.upside)+' more. Most businesses lose almost none.</p></div>';
+  }
+  ['price','cost','qty','inc'].forEach(function(id){ $(id).addEventListener('input', render); });
+  render();
+})();
+</script>
+</body>
+</html>

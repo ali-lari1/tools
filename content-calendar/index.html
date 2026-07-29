@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The 30-day content calendar — a month of posts, planned, by Ali Lari</title>
+<meta name="description" content="Pick a start date and a topic and get four weeks of weekday posts, each with a pillar, a format, and a prompt. No more blank-page mornings." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8; --coral:#E5876B;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:600px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px; display:grid; grid-template-columns:1fr 1fr; gap:14px }
+  .field{ display:flex; flex-direction:column; gap:7px } label{ font-size:14px; color:var(--dim) }
+  input{ width:100%; background:var(--navy); border:1px solid var(--line); border-radius:10px; color:var(--cream); font-size:16px; font-family:inherit; padding:12px 14px }
+  input:focus{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .result{ margin-top:26px }
+  .wk{ color:var(--gold); font-size:12px; letter-spacing:.12em; text-transform:uppercase; margin:20px 0 10px }
+  .day{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:10px }
+  .day .top{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px }
+  .day .date{ font-size:14px; color:var(--cream); font-weight:600; font-variant-numeric:tabular-nums }
+  .day .pill{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; color:var(--navy) }
+  .day .fmt{ font-size:12px; color:var(--dim) }
+  .day .pr{ font-size:15px; color:var(--cream); line-height:1.45 }
+  .invalid{ color:var(--dim); font-size:16px; margin-top:22px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">A month, planned in a minute</div>
+  <h1>The 30-day content calendar</h1>
+  <p class="sub">The reason people stop posting is the blank page, not the effort. Pick a start date and a topic and get four weeks of weekday posts, each with a pillar, a format, and a prompt.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card">
+    <div class="field"><label for="start">Start date</label><input id="start" type="date" /></div>
+    <div class="field"><label for="topic">Your topic</label><input id="topic" type="text" value="AI automation" placeholder="what you post about" /></div>
+  </div>
+
+  <div class="result" id="result"></div>
+  <p class="foot">Built by Ali Lari. The prompts are starters, not scripts. Your specific number or story is what makes each one land.</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+
+  // COMPUTE-START content-calendar (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var start=v.start, topic=((v.topic||'').trim())||'your work', weeks=v.weeks||4;
+    if(!start || !/^\d{4}-\d{2}-\d{2}$/.test(start)) return {kind:"invalid", msg:"Pick a start date."};
+    var rotation=[
+      {pillar:"Build receipt", color:"#5DCAA5", format:"Photo or screenshot", tpl:"Show a real thing you built or a result from TOPIC, with one hard number."},
+      {pillar:"Contrarian take", color:"#E5876B", format:"Short text", tpl:"Challenge a common belief about TOPIC that most people get wrong."},
+      {pillar:"Steal my system", color:"#C7A24C", format:"Carousel", tpl:"A step-by-step playbook for TOPIC someone can save and use today."},
+      {pillar:"Build receipt", color:"#5DCAA5", format:"Photo or screenshot", tpl:"A before and after from TOPIC, framed as a personal build."},
+      {pillar:"Personal story", color:"#8894a8", format:"Candid photo", tpl:"A lesson from your own experience with TOPIC, including what went wrong first."}
+    ];
+    var d=new Date(start+"T00:00:00Z");
+    if(isNaN(d.getTime())) return {kind:"invalid", msg:"Pick a valid start date."};
+    var slots=[], target=weeks*5;
+    while(slots.length<target){
+      var dow=d.getUTCDay();
+      if(dow>=1 && dow<=5){
+        var r=rotation[dow-1];
+        slots.push({ date:d.toISOString().slice(0,10), dow:dow, week:Math.floor(slots.length/5)+1,
+          pillar:r.pillar, color:r.color, format:r.format, prompt:r.tpl.replace(/TOPIC/g, topic) });
+      }
+      d=new Date(d.getTime()+86400000);
+    }
+    return {kind:"ok", slots:slots};
+  }
+  // COMPUTE-END
+
+  var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  function fmtDate(iso, dow){ var p=iso.split('-'); return DAYS[dow]+' '+p[2]+'/'+p[1]; }
+  function render(){
+    var r=compute({start:$('start').value, topic:$('topic').value, weeks:4});
+    if(r.kind==="invalid"){ $('result').innerHTML='<p class="invalid">'+r.msg+'</p>'; return; }
+    var html='', curWeek=0;
+    r.slots.forEach(function(s){
+      if(s.week!==curWeek){ curWeek=s.week; html+='<div class="wk">Week '+curWeek+'</div>'; }
+      html+='<div class="day"><div class="top"><span class="date">'+fmtDate(s.date, s.dow)+'</span>'+
+        '<span class="pill" style="background:'+s.color+'">'+s.pillar+'</span><span class="fmt">'+s.format+'</span></div>'+
+        '<div class="pr">'+s.prompt+'</div></div>';
+    });
+    $('result').innerHTML=html;
+  }
+  // default start = today (browser only; compute stays pure/testable)
+  try{ $('start').value=new Date().toISOString().slice(0,10); }catch(e){}
+  $('start').addEventListener('input', render);
+  $('topic').addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>

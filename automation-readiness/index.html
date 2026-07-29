@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The automation readiness check — is this process ready to automate, by Ali Lari</title>
+<meta name="description" content="Score a process 0-100 on whether it is actually ready to automate, and see exactly what to fix before you build anything." />
+<style>
+  :root{
+    --navy:#0E1B33; --card:#16273f; --line:#243554;
+    --gold:#C7A24C; --gold-soft:#D9BC72; --cream:#F4EFE3; --dim:#9FB0C4;
+    --teal:#5DCAA5; --grey:#8894a8; --red:#E5736B;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--navy)}
+  body{ color:var(--cream); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ min-height:100vh; padding:clamp(28px,5vw,72px) 20px; display:flex; justify-content:center; }
+  .col{ width:100%; max-width:580px; }
+  .rule{ width:56px; height:5px; background:var(--gold) }
+  .eyebrow{ color:var(--gold); font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin-top:16px }
+  h1{ font-size:clamp(30px,6vw,46px); line-height:1.05; font-weight:800; letter-spacing:-.02em; margin:10px 0 10px; text-wrap:balance }
+  .sub{ color:var(--dim); font-size:16px; line-height:1.55; margin:0; max-width:48ch }
+  .byline{ color:var(--dim); font-size:13px; margin-top:10px } .byline b{ color:var(--cream); font-weight:600 }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:28px }
+  .qrow{ margin-bottom:18px } .qrow:last-child{ margin-bottom:0 }
+  .qlab{ font-size:15px; color:var(--cream); margin-bottom:8px; line-height:1.4 }
+  .seg{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px }
+  .seg button{ background:var(--navy); border:1px solid var(--line); color:var(--dim); border-radius:9px; padding:9px; font-size:14px; font-family:inherit; cursor:pointer; transition:border-color .15s, color .15s }
+  .seg button:hover{ border-color:var(--gold-soft) }
+  .seg button.on{ border-color:var(--gold); color:var(--cream); background:#1c3050 }
+  button:focus-visible{ outline:2px solid var(--gold-soft); outline-offset:1px }
+  .result{ margin-top:28px }
+  .scorehead{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap }
+  .score{ font-size:clamp(44px,11vw,72px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.02em }
+  .score small{ font-size:.34em; color:var(--dim); font-weight:700 }
+  .chip{ display:inline-flex; font-size:13px; letter-spacing:.06em; text-transform:uppercase; font-weight:700; padding:6px 13px; border-radius:999px; color:var(--navy) }
+  .scorebar{ height:10px; background:var(--navy); border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-top:16px }
+  .scorefill{ height:100%; border-radius:999px; transition:width .35s ease, background .2s }
+  .blockers{ margin-top:20px } .blockers .lab{ color:var(--gold); font-size:12px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px }
+  .blockers ul{ margin:0; padding-left:18px } .blockers li{ font-size:15px; color:var(--dim); line-height:1.5; margin-bottom:5px }
+  .ready{ color:var(--teal); font-size:15px; margin-top:12px }
+  .foot{ color:var(--dim); font-size:13px; margin-top:30px; border-top:1px solid var(--line); padding-top:16px; line-height:1.5 }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="col">
+  <div class="rule"></div>
+  <div class="eyebrow">Before you automate a process</div>
+  <h1>The automation readiness check</h1>
+  <p class="sub">A process that is not ready will fight the automation the whole way. Answer six questions and get a readiness score plus the exact blockers to clear first.</p>
+  <p class="byline">Built by <b>Ali Lari</b></p>
+
+  <div class="card" id="qs"></div>
+  <div class="result" id="result"></div>
+  <p class="foot">Built by Ali Lari. A low score is not a no. It is a to-do list for the week before you build.</p>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var QS=[
+    { q:"Can you write the exact steps down on one page?", fix:"Document the steps first. If you cannot write them, an automation cannot follow them." },
+    { q:"Do the steps stay the same week to week?", fix:"Stabilise the process before automating. Automating a moving target means constant rework." },
+    { q:"Are the inputs already digital (forms, sheets, apps)?", fix:"Get the inputs out of heads and paper into a digital source the automation can read." },
+    { q:"Does it happen often enough to be worth it (daily or weekly)?", fix:"Rare tasks rarely earn the build. Point the effort at something that eats more of the week." },
+    { q:"Do the tools involved connect (API, export, or integration)?", fix:"Check the tools can talk to each other. A closed system with no export blocks most automation." },
+    { q:"Does it rarely need a human judgment call?", fix:"If most runs need judgment, this is an agent job or a human job, not a straight automation." }
+  ];
+  var ans=[1,1,1,1,1,1];
+  var LABELS=["No","Somewhat","Yes"];
+
+  // COMPUTE-START automation-readiness (pure; unit-tested in tests/tools-logic.test.mjs)
+  function compute(v){
+    var a=v.answers||[];
+    if(a.length<6) return {kind:"incomplete"};
+    var sum=0; for(var i=0;i<6;i++) sum+=a[i];
+    var score=Math.round(sum/12*100);
+    var verdict = score>=75 ? "Ready to automate" : score>=45 ? "Close, clear the blockers" : "Not ready yet";
+    var band = score>=75 ? "teal" : score>=45 ? "gold" : "red";
+    var weak=[]; for(var j=0;j<6;j++){ if(a[j]<2) weak.push(j); }
+    return {kind:"ok", score:score, verdict:verdict, band:band, weak:weak};
+  }
+  // COMPUTE-END
+
+  var bandColor={teal:"var(--teal)", gold:"var(--gold)", red:"var(--red)"};
+  function renderQs(){
+    $('qs').innerHTML = QS.map(function(item,i){
+      return '<div class="qrow"><div class="qlab">'+(i+1)+'. '+item.q+'</div><div class="seg" data-q="'+i+'">'+
+        LABELS.map(function(l,vi){ return '<button data-v="'+vi+'"'+(ans[i]===vi?' class="on"':'')+'>'+l+'</button>'; }).join('')+
+        '</div></div>';
+    }).join('');
+    Array.prototype.forEach.call($('qs').querySelectorAll('.seg'), function(seg){
+      var qi=+seg.dataset.q;
+      Array.prototype.forEach.call(seg.querySelectorAll('button'), function(b){
+        b.addEventListener('click', function(){ ans[qi]=+b.dataset.v; renderQs(); render(); });
+      });
+    });
+  }
+  function render(){
+    var r=compute({answers:ans});
+    var col=bandColor[r.band];
+    var blockers = r.weak.length
+      ? '<div class="blockers"><div class="lab">Clear these first</div><ul>'+r.weak.map(function(i){return '<li>'+QS[i].fix+'</li>';}).join('')+'</ul></div>'
+      : '<p class="ready">Every factor is green. This is a clean one to build.</p>';
+    $('result').innerHTML=
+      '<div class="scorehead"><div class="score" style="color:'+col+'">'+r.score+'<small> / 100 ready</small></div>'+
+        '<span class="chip" style="background:'+col+'">'+r.verdict+'</span></div>'+
+      '<div class="scorebar"><div class="scorefill" style="width:'+r.score+'%;background:'+col+'"></div></div>'+
+      blockers;
+  }
+  renderQs(); render();
+})();
+</script>
+</body>
+</html>
