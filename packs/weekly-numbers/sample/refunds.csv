@@ -1,0 +1,14 @@
+refund_id,order_id,refunded_at,amount,reason
+R900,#4105,2026-10-23,109,wrong shade
+R901,#4140,2026-10-25,358,changed mind
+R902,#4177,2026-10-27,259,wrong shade
+R903,#4259,2026-11-01,219,arrived damaged
+R904,#4260,2026-11-02,199,arrived damaged
+R905,#4261,2026-11-02,289,arrived damaged
+R906,#4262,2026-11-01,475,arrived damaged
+R907,#4263,2026-11-01,418,arrived damaged
+R908,#4264,2026-11-02,169,arrived damaged
+R909,#4231,2026-10-29,109,wrong shade
+R910,#4288,2026-11-01,235,wrong shade
+R911,#4327,2026-11-03,169,wrong shade
+R912,#4238,2026-11-03,259,changed mind
