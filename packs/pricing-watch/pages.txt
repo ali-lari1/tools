@@ -1,0 +1,6 @@
+claude.com/pricing
+cursor.com/pricing
+lovable.dev/pricing
+replit.com/pricing
+n8n.io/pricing
+zapier.com/pricing
